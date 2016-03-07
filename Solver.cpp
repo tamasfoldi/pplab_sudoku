@@ -89,6 +89,14 @@ bool Solver::isAllowed(char val, int x, int y)
 	return allowed;
 }
 
+void Solver::solverSuggestion() {
+  // az eredeti sudoku tábla felosztása 9 részre (openMP) úgy hogy mindenki lássa a saját sorát és oszlopát
+  // ez alapján fogja minden node párhuzamosan (MPI) megoldani a saját 3*3-as négyzetét a már implementált solveBackTrack-kel
+  // majd a hibákat a host javítja (openMP vagy semmi)
+}
+
+
+
 bool Solver::solveBackTrack()
 {
 	// Készen vagyunk?
