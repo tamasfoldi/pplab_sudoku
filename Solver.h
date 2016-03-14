@@ -13,7 +13,7 @@ public:
 	~Solver();
 
 	void print(std::ostream &s);
-
+	// void printBox(std::ostream &s, char** box);
 	bool isSolved();
 	bool isAllowed(char val, int x, int y);
 	bool solveBackTrack();
@@ -22,11 +22,11 @@ public:
 
 	void initSize(int n);
 
-private:
 	void sendBoxesToNodes();
 	void collectPossibleValues(char* box, char** relevantBoxes);
+private:
 
-	char* getBox(int boxRowNum,int boxColNum);			
+	void getBox(int boxRowNum,int boxColNum);			
 	char** getRelevantBoxes(int boxRowNum,int boxColNum);
 
 	char data[9][9];
@@ -38,4 +38,3 @@ private:
 	int numNodes = 4;
 	int boxNumPerNode;
 };
-

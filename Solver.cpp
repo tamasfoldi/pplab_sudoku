@@ -1,4 +1,5 @@
 #include "Solver.h"
+#include "Box.h"
 #include <math.h>
 
 Solver::Solver()
@@ -90,6 +91,7 @@ bool Solver::isAllowed(char val, int x, int y)
 
 	return allowed;
 }
+
 /*
 void Solver::solverSuggestion() {
   // 1.
@@ -152,32 +154,70 @@ void Solver::set(char val, int x, int y)
 void Solver::initSize(int n) 
 {
 	N = n;
-	boxWidth = N;
+	boxWidth = sqrt(N);
 	boxNumPerNode = ceil(sqrt(N) /  numNodes);
 }
 
 // box és releváns boxok küldése egyes node oknak
 void Solver::sendBoxesToNodes()
 {
-	int boxesInRow = boxWidth;
-	int boxesInCol = boxWidth;
+	int slaveNum = 3;
+	int batchesPerSlave = 9 / slaveNum;
 
+	int boxesInRow = 3;
+	int boxesInCol = 3;
+
+	int collectedBatch = 0;
+	// std::cout << "Send boxes to nodes" << std::endl;
 	for(int rowNum = 0; rowNum < boxesInRow; rowNum++)
 	{
+		// std::cout << "row: " << rowNum << std::endl;
 		for(int colNum = 0; colNum < boxesInCol; colNum++)
 		{
+			
+			// std::cout << "col: " << colNum << std::endl;
+			getBox(rowNum, colNum);
 			// char box[boxWidth * boxWidth] = getBox(rowNum, colNum);			
 			// char relevantBoxes[boxesInRow] = getRelevantBoxes(rowNum, colNum);
 			// send boxes
+
+			collectedBatch++;
+			if(collectedBatch == batchesPerSlave)
+			{
+				// box ok küldése
+				collectedBatch = 0;
+			}
 		}
 	}
 
 }
 
-// visszadja a rowNum sor és colNum oszlopban található Doboxt
-char* Solver::getBox(int rowNum, int colNum)
+// visszadja a rowNum sor és colNum oszlopban található Dobozt
+void Solver::getBox(int rowNum, int colNum)
 {
+	int rowStart = rowNum * 3;
+	int colStart = colNum * 3;
 
+	Box box;
+
+	/*
+	char** box = new char*[3];
+	for(int i = 0; i < 3; i++) {
+		box[i] = new char[3];
+	} 
+	*/
+
+	// std::cout << "GetBOx: " << std::endl;
+	for(int i = rowStart; i < rowStart + 3; i++)
+	{
+		// std::cout << "row: " << i << std::endl;
+		for(int j = colStart; j < colStart + 3; j++)
+		{
+			// std::cout << "col: " << j << std::endl;
+			box.set(data[i][j], i - rowStart, j - colStart);
+		}	
+	}
+	box.print(std::cout);
 }
 
 // visszadja a rowNum sor és colNum oszlopban található Dobozhoz tartozó lehetséges

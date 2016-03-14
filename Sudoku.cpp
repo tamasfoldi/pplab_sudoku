@@ -12,8 +12,9 @@ int main()
 	solver.print(std::cout);
 	std::cout << std::endl << "-----------------------------------------" << std::endl;
 	std::cout << "Solution:" << std::endl << std::endl;;
-	solver.solveBackTrack();
+	//solver.solveBackTrack();
 	solver.print(std::cout);
+	solver.sendBoxesToNodes();
     return 0;
 }
 
