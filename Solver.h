@@ -21,6 +21,7 @@ public:
 	void set(char val, int x, int y);
 
 	void initSize(int n);
+
 private:
 	void sendBoxesToNodes();
 	void collectPossibleValues(char* box, char** relevantBoxes);
@@ -34,7 +35,7 @@ private:
 	int N;
 	int boxWidth;
 
-	const int numNodes = 4;
+	int numNodes = 4;
 	int boxNumPerNode;
 };
 

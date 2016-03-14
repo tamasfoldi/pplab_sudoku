@@ -149,7 +149,7 @@ void Solver::set(char val, int x, int y)
 	data[y][x] = val;
 }
 
-void initSize(int n) 
+void Solver::initSize(int n) 
 {
 	N = n;
 	boxWidth = N;
@@ -157,7 +157,7 @@ void initSize(int n)
 }
 
 // box és releváns boxok küldése egyes node oknak
-void sendBoxesToNodes()
+void Solver::sendBoxesToNodes()
 {
 	int boxesInRow = boxWidth;
 	int boxesInCol = boxWidth;
@@ -166,8 +166,8 @@ void sendBoxesToNodes()
 	{
 		for(int colNum = 0; colNum < boxesInCol; colNum++)
 		{
-			char box[boxWidth * boxWidth] = getBox(rowNum, colNum);			
-			char relevantBoxes[boxesInRow] = getRelevantBoxes(rowNum, colNum);
+			// char box[boxWidth * boxWidth] = getBox(rowNum, colNum);			
+			// char relevantBoxes[boxesInRow] = getRelevantBoxes(rowNum, colNum);
 			// send boxes
 		}
 	}
@@ -175,14 +175,14 @@ void sendBoxesToNodes()
 }
 
 // visszadja a rowNum sor és colNum oszlopban található Doboxt
-char* getBox(int rowNum, int colNum)
+char* Solver::getBox(int rowNum, int colNum)
 {
 
 }
 
 // visszadja a rowNum sor és colNum oszlopban található Dobozhoz tartozó lehetséges
 // értékek szempontjából fontos dobozokat
-char** getRelevantBoxes(int rowNum,int colNum)
+char** Solver::getRelevantBoxes(int rowNum,int colNum)
 {
 
 }
