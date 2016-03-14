@@ -1,9 +1,9 @@
 #include "Solver.h"
-
-
+#include <math.h>
 
 Solver::Solver()
 {
+	initSize(9);
 	for (int y = 0; y < 9; ++y)
 	{
 		for (int x = 0; x < 9; ++x)
@@ -15,6 +15,7 @@ Solver::Solver()
 
 Solver::Solver(const char * init)
 {
+	initSize(9);
 	for (int i = 0; i < 81; ++i)
 	{
 		int x = i % 9;
@@ -25,6 +26,7 @@ Solver::Solver(const char * init)
 
 Solver::Solver(const Solver * init)
 {
+	initSize(9);
 	for (int y = 0; y < 9; ++y)
 	{
 		for (int x = 0; x < 9; ++x)
@@ -88,7 +90,7 @@ bool Solver::isAllowed(char val, int x, int y)
 
 	return allowed;
 }
-
+/*
 void Solver::solverSuggestion() {
   // 1.
   // az eredeti sudoku tábla felosztása 9 részre (openMP) úgy hogy mindenki lássa a saját sorát és oszlopát
@@ -96,9 +98,7 @@ void Solver::solverSuggestion() {
   // ez alapján fogja minden node párhuzamosan (MPI) megoldani a saját 3*3-as négyzetét a már implementált solveBackTrack-kel
   // majd a hibákat a host javítja (openMP vagy semmi)
    
-}
-
-
+}*/
 
 bool Solver::solveBackTrack()
 {
@@ -147,4 +147,42 @@ bool Solver::solveBackTrack()
 void Solver::set(char val, int x, int y)
 {
 	data[y][x] = val;
+}
+
+void initSize(int n) 
+{
+	N = n;
+	boxWidth = N;
+	boxNumPerNode = ceil(sqrt(N) /  numNodes);
+}
+
+// box és releváns boxok küldése egyes node oknak
+void sendBoxesToNodes()
+{
+	int boxesInRow = boxWidth;
+	int boxesInCol = boxWidth;
+
+	for(int rowNum = 0; rowNum < boxesInRow; rowNum++)
+	{
+		for(int colNum = 0; colNum < boxesInCol; colNum++)
+		{
+			char box[boxWidth * boxWidth] = getBox(rowNum, colNum);			
+			char relevantBoxes[boxesInRow] = getRelevantBoxes(rowNum, colNum);
+			// send boxes
+		}
+	}
+
+}
+
+// visszadja a rowNum sor és colNum oszlopban található Doboxt
+char* getBox(int rowNum, int colNum)
+{
+
+}
+
+// visszadja a rowNum sor és colNum oszlopban található Dobozhoz tartozó lehetséges
+// értékek szempontjából fontos dobozokat
+char** getRelevantBoxes(int rowNum,int colNum)
+{
+
 }
