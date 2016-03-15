@@ -1,5 +1,4 @@
 #include "Solver.h"
-#include "Box.h"
 #include <math.h>
 
 Solver::Solver()
@@ -176,9 +175,10 @@ void Solver::sendBoxesToNodes()
 		{
 			
 			// std::cout << "col: " << colNum << std::endl;
-			getBox(rowNum, colNum);
+			Box currentBox = getBox(rowNum, colNum);
+
 			// char box[boxWidth * boxWidth] = getBox(rowNum, colNum);			
-			// char relevantBoxes[boxesInRow] = getRelevantBoxes(rowNum, colNum);
+			char relevantBoxes[boxesInRow] = getRelevantBoxes(rowNum, colNum);
 			// send boxes
 
 			collectedBatch++;
@@ -193,7 +193,7 @@ void Solver::sendBoxesToNodes()
 }
 
 // visszadja a rowNum sor és colNum oszlopban található Dobozt
-void Solver::getBox(int rowNum, int colNum)
+Box Solver::getBox(int rowNum, int colNum)
 {
 	int rowStart = rowNum * 3;
 	int colStart = colNum * 3;
@@ -218,11 +218,12 @@ void Solver::getBox(int rowNum, int colNum)
 		}	
 	}
 	box.print(std::cout);
+	return box;
 }
 
 // visszadja a rowNum sor és colNum oszlopban található Dobozhoz tartozó lehetséges
 // értékek szempontjából fontos dobozokat
-char** Solver::getRelevantBoxes(int rowNum,int colNum)
+Box* Solver::getRelevantBoxes(int rowNum,int colNum)
 {
-
+	Box relevantBoxes[4];
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include "Box.h"
 
 class Solver
 {
@@ -26,7 +27,7 @@ public:
 	void collectPossibleValues(char* box, char** relevantBoxes);
 private:
 
-	void getBox(int boxRowNum,int boxColNum);			
+	Box getBox(int boxRowNum,int boxColNum);			
 	char** getRelevantBoxes(int boxRowNum,int boxColNum);
 
 	char data[9][9];
