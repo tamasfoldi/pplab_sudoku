@@ -1,7 +1,9 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include "Box.h"
+#include "Batch.h"
 
 class Solver
 {
@@ -23,12 +25,18 @@ public:
 
 	void initSize(int n);
 
-	void sendBoxesToNodes();
+	void sendBoxesToNodes(std::vector<Batch> batches);
 	void collectPossibleValues(char* box, char** relevantBoxes);
+
+	void fragmentTableToBoxes();
+	std::vector<Batch> getBoxBatches();
+
 private:
 
+	Batch getBatchForBox(int boxIndex);
 	Box getBox(int boxRowNum,int boxColNum);			
-	Box* getRelevantBoxes(int boxRowNum,int boxColNum);
+
+	std::vector<Box> boxes;
 
 	char data[9][9];
 	char possibleValues[9][9][9];

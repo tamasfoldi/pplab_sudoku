@@ -96,10 +96,10 @@ bool Solver::isAllowed(char val, int x, int y)
 /*
 void Solver::solverSuggestion() {
   // 1.
-  // az eredeti sudoku tábla felosztása 9 részre (openMP) úgy hogy mindenki lássa a saját sorát és oszlopát
-  // (tehát minden node kapni fog 5 3*3-as négyzetet ebbol egyen dolgozik és annak az eredményét adja vissza)
-  // ez alapján fogja minden node párhuzamosan (MPI) megoldani a saját 3*3-as négyzetét a már implementált solveBackTrack-kel
-  // majd a hibákat a host javítja (openMP vagy semmi)
+  // az eredeti sudoku tábla felosztása 9 részre (openMP) úgy hogy mindenki lássa a saiát sorát és oszlopát
+  // (tehát minden node kapni fog 5 3*3-as négyzetet ebbol egyen dolgozik és annak az eredményét adia vissza)
+  // ez alapián fogia minden node párhuzamosan (MPI) megoldani a saiát 3*3-as négyzetét a már implementált solveBackTrack-kel
+  // maid a hibákat a host iavítia (openMP vagy semmi)
    
 }*/
 
@@ -125,11 +125,11 @@ bool Solver::solveBackTrack()
 					// Beírható az adott pozícióba?
 					if (isAllowed(n, x, y))
 					{
-						// Másoljuk le a táblát
+						// Másoliuk le a táblát
 						Solver tmpSolver(this);
-						// Írjuk bele az új értéket
+						// Íriuk bele az úi értéket
 						tmpSolver.set(n, x, y);
-						// Próbáljuk megoldani az új táblát
+						// Próbáliuk megoldani az úi táblát
 						if (tmpSolver.solveBackTrack())
 						{
 							// Megoldás
@@ -139,7 +139,7 @@ bool Solver::solveBackTrack()
 					}
 				}
 			}
-			// Nem tudtunk értéket írni a cellába, így lépjünk vissza
+			// Nem tudtunk értéket írni a cellába, így lépiünk vissza
 			if (data[y][x] == 0) return false;
 		}
 	}
@@ -160,71 +160,33 @@ void Solver::initSize(int n)
 }
 
 // box és releváns boxok küldése egyes node oknak
-void Solver::sendBoxesToNodes()
+void Solver::sendBoxesToNodes(std::vector<Batch> batches)
 {
 	int slaveNum = 3;
-	int batchesPerSlave = 9 / slaveNum;
+	int numOfBoxes = 9;
+	int batchesPerSlave = ceil(numOfBoxes / slaveNum);
 
-	int boxesInRow = 3;
-	int boxesInCol = 3;
-
-	int collectedBatch = 0;
-	std::vector<Box> boxes;
-
-	// std::cout << "Send boxes to nodes" << std::endl;
-	for(int rowNum = 0; rowNum < boxesInRow; rowNum++)
+	std::vector<Batch> batchesToSend;
+	int numOfCollectedBatches = 0;
+	for(auto &batch: batches)
 	{
-		// std::cout << "row: " << rowNum << std::endl;
-		for(int colNum = 0; colNum < boxesInCol; colNum++)
+		batchesToSend.push_back(batch);
+		numOfCollectedBatches++;
+		if(numOfCollectedBatches == batchesPerSlave)
 		{
-			
-			// std::cout << "col: " << colNum << std::endl;
-			Box currentBox = getBox(rowNum, colNum);
-			boxes.push_back(currentBox);
-			// char box[boxWidth * boxWidth] = getBox(rowNum, colNum);			
-			//char relevantBoxes[boxesInRow] = getRelevantBoxes(rowNum, colNum);
-			// send boxes
-
-			collectedBatch++;
-			if(collectedBatch == batchesPerSlave)
+			/*std::cout << "Sending batches to Node" << std::endl;
+			for(auto &b : batchesToSend)
 			{
-				// box ok küldése
-				collectedBatch = 0;
-			}
+				b.print(std::cout);
+			}*/
+			batchesToSend.empty();
+			numOfCollectedBatches = 0;
 		}
-	}
-	
-	std::vector<Batch> batches;
-	int boxesPerRow = 3;
-	int boxesPerCol = 3;
-	for(int i = 0; i < boxes.size(); i++)
-	{
-		Batch batch;
-		int rowNum = i / boxesPerRow;
-		int colNum = i % boxesPerRow;
 
-		for(int j = 0; j < 9; j++)
-		{
-			if((j / boxesPerRow == rowNum) && (j % boxesPerCol == colNum))
-			{
-				batch.setWorkBox(boxes[j]);
-			} 
-			else if(j / boxesPerRow == rowNum)
-			{
-				batch.addBoxToRow(boxes[j]);
-			}
-			else if(j % boxesPerCol == colNum)
-			{
-				batch.addBoxToColumn(boxes[j]);
-			}
-		}
-		
-		batch.print(std::cout);
-		//box.print(std::cout);
 	}
 }
 
-// visszadja a rowNum sor és colNum oszlopban található Dobozt
+// visszadia a rowNum sor és colNum oszlopban található Dobozt
 Box Solver::getBox(int rowNum, int colNum)
 {
 	int rowStart = rowNum * 3;
@@ -232,20 +194,13 @@ Box Solver::getBox(int rowNum, int colNum)
 
 	Box box;
 
-	/*
-	char** box = new char*[3];
-	for(int i = 0; i < 3; i++) {
-		box[i] = new char[3];
-	} 
-	*/
-
 	// std::cout << "GetBOx: " << std::endl;
 	for(int i = rowStart; i < rowStart + 3; i++)
 	{
 		// std::cout << "row: " << i << std::endl;
 		for(int j = colStart; j < colStart + 3; j++)
 		{
-			// std::cout << "col: " << j << std::endl;
+			// std::cout << "col: " << i << std::endl;
 			box.set(data[i][j], i - rowStart, j - colStart);
 		}	
 	}
@@ -253,9 +208,70 @@ Box Solver::getBox(int rowNum, int colNum)
 	return box;
 }
 
-// visszadja a rowNum sor és colNum oszlopban található Dobozhoz tartozó lehetséges
-// értékek szempontjából fontos dobozokat
-Box* Solver::getRelevantBoxes(int rowNum,int colNum)
+void Solver::fragmentTableToBoxes()
 {
-	Box relevantBoxes[4];
+	int boxesPerRow = 3;
+	int boxesPerCol = 3;
+
+	// std::cout << "Send boxes to nodes" << std::endl;
+	for(int rowNum = 0; rowNum < boxesPerRow; rowNum++)
+	{
+		// std::cout << "row: " << rowNum << std::endl;
+		for(int colNum = 0; colNum < boxesPerCol; colNum++)
+		{
+			// std::cout << "col: " << colNum << std::endl;
+			
+			Box currentBox = getBox(rowNum, colNum);
+			// currentBox.print(std::cout);
+			
+			// std::cout << "pre" << std::endl;
+			boxes.push_back(currentBox);			
+			/*for(auto &box: boxes)
+			{
+				box.print(std::cout);
+			}*/
+			// std::cout << "post" << std::endl;
+		}
+	}
+}
+
+std::vector<Batch> Solver::getBoxBatches()
+{
+	std::vector<Batch> batches;
+	for(int i = 0; i < boxes.size(); i++)
+	{
+		batches.push_back(getBatchForBox(i));
+	}
+
+	return batches;
+}
+
+
+Batch Solver::getBatchForBox(int boxIndex)
+{
+	int boxesPerRow = 3;
+	int boxesPerCol = 3;
+
+	Batch batch;
+	int rowNum = boxIndex / boxesPerRow;
+	int colNum = boxIndex % boxesPerRow;
+
+	for(int i = 0; i < 9; i++)
+	{
+		if((i / boxesPerRow == rowNum) && (i % boxesPerCol == colNum))
+		{
+			batch.setWorkBox(boxes[i]);
+		} 
+		else if(i / boxesPerRow == rowNum)
+		{
+			batch.addBoxToRow(boxes[i]);
+		}
+		else if(i % boxesPerCol == colNum)
+		{
+			batch.addBoxToColumn(boxes[i]);
+		}
+	}
+	
+	// batch.print(std::cout);
+	return batch;
 }

@@ -14,7 +14,11 @@ int main()
 	std::cout << "Solution:" << std::endl << std::endl;;
 	//solver.solveBackTrack();
 	solver.print(std::cout);
-	solver.sendBoxesToNodes();
+
+	std::cout << "fragmentTableToBoxes" << std::endl;
+	solver.fragmentTableToBoxes();
+	std::cout << "sendBoxesToNodes" << std::endl;
+	solver.sendBoxesToNodes(solver.getBoxBatches());
     return 0;
 }
 
