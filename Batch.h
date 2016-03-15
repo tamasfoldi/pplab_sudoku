@@ -11,6 +11,9 @@ public:
 
 	~Batch();
 	void setWorkBox(Box box);
+	void setRow(std::vector<Box> newRow);
+	void setColumn(std::vector<Box> newColumn);
+
 	void addBoxToRow(Box box);
 	void addBoxToColumn(Box box);
 

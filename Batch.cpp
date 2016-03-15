@@ -16,6 +16,17 @@ void Batch::setWorkBox(Box box)
 	this->workBox = box;
 }
 
+
+void Batch::setRow(std::vector<Box> newRow)
+{
+	this->row = newRow;
+}
+
+void Batch::setColumn(std::vector<Box> newColumn)
+{
+	this->column = newColumn;
+}
+
 void Batch::addBoxToRow(Box box)
 {
 	this->row.push_back(box);

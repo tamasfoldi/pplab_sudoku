@@ -1,5 +1,6 @@
 #include "Solver.h"
 #include "Batch.h"
+#include <mpi.h>
 #include <math.h>
 #include <vector>
 
@@ -158,18 +159,32 @@ void Solver::sendBoxesToNodes(std::vector<Batch> batches)
 
     std::vector<Batch> batchesToSend;
     int numOfCollectedBatches = 0;
+    int slaveId = 1;
     for(auto &batch: batches)
     {
-        batchesToSend.push_back(batch);
+        // batchesToSend.push_back(batch);
         numOfCollectedBatches++;
+
+    	int sizeWorkBox = 9;
+    	int sizeBoxesInRow = 2 * 9;
+    	int sizeBoxesInColumn = 2 * 9;
+        // MPI_Send(batchesToSend, size, MPI_CHAR, slaveId, 0, MPI_COMM_WORLD);
+        //std::vector<unsigned char> data = std::vector<unsigned char>(7);
+        /*for(int i = 0; i < 7; i++)
+        {
+        	data[i] = 'a' + i;
+        }*/
+
+        // MPI_Send(batchesToSend.front().getBoxesInRow().data(), size, MPI_CHAR, slaveId, 0, MPI_COMM_WORLD);
+        MPI_Send(batch.getWorkBox().getCells().data(), sizeWorkBox, MPI_CHAR, slaveId, 0, MPI_COMM_WORLD);
+        MPI_Send(batch.getBoxesInRow().data(), sizeBoxesInRow, MPI_CHAR, slaveId, 1, MPI_COMM_WORLD);
+        MPI_Send(batch.getBoxesInColumn().data(), sizeBoxesInColumn, MPI_CHAR, slaveId, 2, MPI_COMM_WORLD);
+        // std::cout << "AAAAAAAAAAAA" << batchesToSend.data() << std::endl;
+        
+        // batchesToSend.empty();
         if(numOfCollectedBatches == batchesPerSlave)
         {
-            /*std::cout << "Sending batches to Node" << std::endl;
-            for(auto &b : batchesToSend)
-            {
-                b.print(std::cout);
-            }*/
-            batchesToSend.empty();
+            slaveId++;
             numOfCollectedBatches = 0;
         }
 

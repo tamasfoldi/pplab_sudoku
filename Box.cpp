@@ -34,6 +34,17 @@ Box::Box(const Box * init)
 	}
 }
 
+Box::Box(std::vector<char> data)
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			cells[i][j] = data[i * 3 + j];
+		}
+	}
+}
+
 
 Box::~Box()
 {
@@ -69,4 +80,18 @@ void Box::print(std::ostream & s)
 		s << std::endl;
 	}
 	s << std::endl;
+}
+
+std::vector<char> Box::getCells()
+{
+	std::vector<char> ret;
+	for(int i = 0; i < 3; i++)
+	{
+		for(int j = 0; j < 3; j++)
+		{
+			ret.push_back(cells[i][j]);
+		}
+	}
+
+	return ret;
 }
