@@ -1,5 +1,7 @@
 #include "Solver.h"
+#include "Batch.h"
 #include <math.h>
+#include <vector>
 
 Solver::Solver()
 {
@@ -167,6 +169,8 @@ void Solver::sendBoxesToNodes()
 	int boxesInCol = 3;
 
 	int collectedBatch = 0;
+	std::vector<Box> boxes;
+
 	// std::cout << "Send boxes to nodes" << std::endl;
 	for(int rowNum = 0; rowNum < boxesInRow; rowNum++)
 	{
@@ -176,9 +180,9 @@ void Solver::sendBoxesToNodes()
 			
 			// std::cout << "col: " << colNum << std::endl;
 			Box currentBox = getBox(rowNum, colNum);
-
+			boxes.push_back(currentBox);
 			// char box[boxWidth * boxWidth] = getBox(rowNum, colNum);			
-			char relevantBoxes[boxesInRow] = getRelevantBoxes(rowNum, colNum);
+			//char relevantBoxes[boxesInRow] = getRelevantBoxes(rowNum, colNum);
 			// send boxes
 
 			collectedBatch++;
@@ -189,7 +193,35 @@ void Solver::sendBoxesToNodes()
 			}
 		}
 	}
+	
+	std::vector<Batch> batches;
+	int boxesPerRow = 3;
+	int boxesPerCol = 3;
+	for(int i = 0; i < boxes.size(); i++)
+	{
+		Batch batch;
+		int rowNum = i / boxesPerRow;
+		int colNum = i % boxesPerRow;
 
+		for(int j = 0; j < 9; j++)
+		{
+			if((j / boxesPerRow == rowNum) && (j % boxesPerCol == colNum))
+			{
+				batch.setWorkBox(boxes[j]);
+			} 
+			else if(j / boxesPerRow == rowNum)
+			{
+				batch.addBoxToRow(boxes[j]);
+			}
+			else if(j % boxesPerCol == colNum)
+			{
+				batch.addBoxToColumn(boxes[j]);
+			}
+		}
+		
+		batch.print(std::cout);
+		//box.print(std::cout);
+	}
 }
 
 // visszadja a rowNum sor és colNum oszlopban található Dobozt
@@ -217,7 +249,7 @@ Box Solver::getBox(int rowNum, int colNum)
 			box.set(data[i][j], i - rowStart, j - colStart);
 		}	
 	}
-	box.print(std::cout);
+	// box.print(std::cout);
 	return box;
 }
 

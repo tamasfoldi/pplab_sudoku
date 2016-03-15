@@ -28,7 +28,7 @@ public:
 private:
 
 	Box getBox(int boxRowNum,int boxColNum);			
-	char** getRelevantBoxes(int boxRowNum,int boxColNum);
+	Box* getRelevantBoxes(int boxRowNum,int boxColNum);
 
 	char data[9][9];
 	char possibleValues[9][9][9];
