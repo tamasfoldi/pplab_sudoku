@@ -180,7 +180,7 @@ void Solver::sendBoxesToNodes(std::vector<Batch> batches)
         MPI_Send(batch.getBoxesInRow().data(), sizeBoxesInRow, MPI_CHAR, slaveId, 1, MPI_COMM_WORLD);
         MPI_Send(batch.getBoxesInColumn().data(), sizeBoxesInColumn, MPI_CHAR, slaveId, 2, MPI_COMM_WORLD);
         // std::cout << "AAAAAAAAAAAA" << batchesToSend.data() << std::endl;
-        
+        break;
         // batchesToSend.empty();
         if(numOfCollectedBatches == batchesPerSlave)
         {

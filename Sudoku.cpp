@@ -37,10 +37,13 @@ void run_slave(int rank) {
 	int sizeWorkBox = 9;
 	int sizeBoxesInRow = 2 * 9;
 	int sizeBoxesInColumn = 2 * 9;
-	int batchesToReceive = 3;
+	int batchesToReceive = 1;
+    
     auto workBoxData = std::vector<char>(9);
     auto rowData = std::vector<Box>(2);
     auto columnData = std::vector<Box>(2);
+
+    std::vector<Batch> batches;
 
    	for(int i = 0; i < batchesToReceive; i++)
    	{
@@ -58,9 +61,15 @@ void run_slave(int rank) {
 	  	Batch batch;
 	  	batch.setWorkBox(workBox);
 	  	batch.setRow(rowData);
-	  	batch.setColumn(columnData);
+	  	batch.setColumn(columnData);        
+        batch.initPossibleValues();
+        batches.push_back(batch);
   	}
 
+    //for (int i = 0; i < batchesToReceive; ++i) {
+    for (int i = 0; i < batchesToReceive; ++i) {
+        batches[i].calculatePossibleValues();
+    }
 }
 
 
