@@ -115,6 +115,7 @@ void Batch::calculatePossibleValues()
 	{
 		for(int i = 0; i < n; i++)
 		{
+
 			if(box.getCells()[i] != 0)
 			{
 				rowValues[i / numRows].insert(box.getCells()[i]);
@@ -139,32 +140,30 @@ void Batch::calculatePossibleValues()
 
 	for(int i = 0; i < n; i++)
 	{
-		auto valueSet = possibleValues[i];
-		
-    	std::cout << std::endl;
-    	
-		valueSet = substractSet(valueSet, workBoxValues);		
-		valueSet = substractSet(valueSet, rowValues[i / numRows]);
-		valueSet = substractSet(valueSet, colValues[i % numRows]);
-
-		std::cout << "After " << std::endl;
-		for(auto &c: valueSet)
-    	{
-    		std::cout << (char)(c + '0');
-    	}
-    	std::cout << std::endl;
-	}
-	/*
-	for(auto &row: colValues) 
-	{
-		for(auto &value: row)
+		if((char)(workBox.getCells()[i] + '0') == (char)('0'))
 		{
-			std::cout << (char)(value + '0') << " ";
+			auto valueSet = possibleValues[i];
+		
+	    	//std::cout << std::endl;	
+			valueSet = substractSet(valueSet, workBoxValues);		
+			valueSet = substractSet(valueSet, rowValues[i / numRows]);
+			valueSet = substractSet(valueSet, colValues[i % numRows]);
+
+			possibleValues[i] = valueSet;
+		} 
+		else 
+		{
+			possibleValues[i].clear();			
+			possibleValues[i].insert(0);
+
+			for(auto &s: possibleValues[i])
+			{
+				std::cout << s << std::endl;
+			}	
 		}
-		std::cout<< std::endl;
-	}*/
-	/*std::set_difference(s1.begin(), s1.end(), s2.begin(), s2.end(),
-    	std::inserter(result, result.end()));*/
+
+	}
+	
 }
 
 std::vector<std::set<char>> Batch::getPossibleValues()
