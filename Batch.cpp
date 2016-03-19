@@ -155,11 +155,12 @@ void Batch::calculatePossibleValues()
 		{
 			possibleValues[i].clear();			
 			possibleValues[i].insert(0);
-
+			/*
 			for(auto &s: possibleValues[i])
 			{
 				std::cout << s << std::endl;
 			}	
+			*/
 		}
 
 	}

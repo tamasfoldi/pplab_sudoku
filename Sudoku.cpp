@@ -3,6 +3,7 @@
 #include <iostream>
 #include <mpi.h>
 #include "Solver.h"
+#include "Cell.h"
 
 namespace crf {
     class mpi_guard {
@@ -12,44 +13,6 @@ namespace crf {
 
     };
 } // namespace crf
-
-
-void run_master() {
-    // Tov�bbi megoldhat� 17 elemet tartalmaz� t�bl�k: http://http://staffhome.ecm.uwa.edu.au/~00013890/sudokumin.php
-    Solver solver("000801000000000043500000000000070800020030000000000100600000075003400000000200600");
-    // std::cout << "Problem:" << std::endl << std::endl;
-    solver.print(std::cout);
-    // std::cout << std::endl << "-----------------------------------------" << std::endl;
-    // std::cout << "Solution:" << std::endl << std::endl;;
-    // //solver.solveBackTrack();
-    // solver.print(std::cout);
-
-    std::cout << "fragmentTableToBoxes" << std::endl;
-    solver.fragmentTableToBoxes();
-    std::cout << "sendBoxesToNodes" << std::endl;
-    solver.sendBoxesToNodes(solver.getBoxBatches());
-    std::cout << "Master" << std::endl;
-
-
-
-    int siize = 9;
-    for(int i = 0; i < 9; i++)
-    {
-        //std::vector<char> superData = std::vector<char>(9);
-        std::vector<char> c = std::vector<char>(9);
-        MPI_Status status;
-        std::cout << "MASTER BEFORE RECEIVE" << std::endl;
-
-        MPI_Recv(c.data(), siize, MPI_CHAR, MPI_ANY_SOURCE, 32, MPI_COMM_WORLD, &status);   
-        Box superBox(c);
-        std::cout << "";
-        superBox.print(std::cout);
-            
-        std::cout << "BEFORE FINALIZE" << std::endl;
-
-    }
-    //MPI_Finalize();
-}
 
 std::vector<char> setToVector(std::set<char> set)
 {
@@ -70,6 +33,68 @@ std::vector<char> setToVector(std::set<char> set)
     }
 
     return res;
+}
+
+void run_master() {
+    // Tov�bbi megoldhat� 17 elemet tartalmaz� t�bl�k: http://http://staffhome.ecm.uwa.edu.au/~00013890/sudokumin.php
+    Solver solver("000801000000000043500000000000070800020030000000000100600000075003400000000200600");
+    // std::cout << "Problem:" << std::endl << std::endl;
+    solver.print(std::cout);
+    // std::cout << std::endl << "-----------------------------------------" << std::endl;
+    // std::cout << "Solution:" << std::endl << std::endl;;
+    // solver.solveBackTrack();
+    // solver.print(std::cout);
+
+    std::cout << "fragmentTableToBoxes" << std::endl;
+    solver.fragmentTableToBoxes();
+    std::cout << "sendBoxesToNodes" << std::endl;   
+    solver.sendBoxesToNodes(solver.getBoxBatches());
+    std::cout << "Master" << std::endl;
+
+    int batchesToReceivePerNode = 3;
+    int maxRank = 3;
+
+    std::vector<std::vector<Cell>> allPossibleValues;
+    int n;
+    for(int i = 1; i <= maxRank; i++)
+    {
+        std::cout << "Rank: " << maxRank << std::endl;
+        for (int j = 0; j < batchesToReceivePerNode; ++j) {
+            int tag = i * 10 + j + 1;
+            int siize = 9;
+            std::cout <<  "Tag: " << tag <<  std::endl;
+
+            std::vector<Cell> cellsOfBox;
+            for(int k = 0; k < 9; k++)
+            {
+                std::cout << "CellNum: " << k << std::endl;
+                std::vector<char> c = std::vector<char>(9);
+                MPI_Status status;
+
+                MPI_Recv(c.data(), siize, MPI_CHAR, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);   
+                Box possibleValuesOfACell(c);                
+                possibleValuesOfACell.print(std::cout);     
+                Cell newCell(n);
+                newCell.setPossibleValues(possibleValuesOfACell.getCells());
+                cellsOfBox.push_back(newCell);
+            }
+            allPossibleValues.push_back(cellsOfBox);
+        }
+    }
+
+    // for all boxes
+    int boxNum = 0;
+    for(auto &box: allPossibleValues)
+    {
+        int cellNum = 0;        
+        for(auto &cell: box)
+        {
+            std::cout << "Box Num: " << boxNum <<  ", Cell Num: " << boxNum << std::endl;
+            cell.print(std::cout);            
+            cellNum++;
+        }
+        boxNum++;
+    }
 }
 
 void run_slave(int rank) {    
@@ -108,13 +133,10 @@ void run_slave(int rank) {
           
         batches.push_back(batch);
   	}
-
-    
-
    
     //std::cout << "BEGIN FOR slaves" << std::endl;
     for (int i = 0; i < batchesToReceive; ++i) {
-        int tag = rank * 10 + i;
+        int tag = rank * 10 + i + 1; // azért +1 hogy 1 based legyen mind a két digit
         batches[i].calculatePossibleValues(); 
         for(int j = 0; j < 9; j++) {
         
@@ -123,7 +145,6 @@ void run_slave(int rank) {
             //batches[0].getWorkBox().print(std::cout);
             MPI_Send(setToVector(batches[i].getPossibleValues()[j]).data(), vSize, MPI_CHAR, 0, tag, MPI_COMM_WORLD);    
         }
-        
     }
 }
 

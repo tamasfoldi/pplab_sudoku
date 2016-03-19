@@ -9,6 +9,8 @@ public:
 	Box();
 	Box(const char** init);
 	Box(const Box* init);
+
+	
 	Box(std::vector<char> data);
 
 	~Box();
@@ -18,5 +20,6 @@ public:
 	std::vector<char> getCells();
 private:
 	char cells[3][3];
+
 };
 

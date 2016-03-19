@@ -1,5 +1,5 @@
-sudoku: Sudoku.o Solver.o Box.o Batch.o
-	mpiCC -o sudoku Sudoku.o Solver.o Box.o Batch.o
+sudoku: Sudoku.o Solver.o Box.o Batch.o Cell.o
+	mpiCC -o sudoku Sudoku.o Solver.o Box.o Batch.o Cell.o
 
 Sudoku.o: Sudoku.cpp
 	mpiCC -std=c++11 -g -O0 -c -o Sudoku.o Sudoku.cpp
@@ -12,6 +12,9 @@ Box.o: Box.h Box.cpp
 
 Batch.o: Batch.h Batch.cpp
 	mpiCC -std=c++11 -g -O0 -c -o Batch.o Batch.cpp
+
+Cell.o: Cell.h Cell.cpp
+	mpiCC -std=c++11 -g -O0 -c -o Cell.o Cell.cpp
 
 clean:
 	rm -f sudoku
