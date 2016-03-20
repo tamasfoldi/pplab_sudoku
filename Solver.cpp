@@ -165,16 +165,16 @@ void Solver::sendBoxesToNodes(std::vector<Batch> batches)
         // batchesToSend.push_back(batch);
         numOfCollectedBatches++;
 
-    	int sizeWorkBox = 9;
-    	int sizeBoxesInRow = 2 * 9;
-    	int sizeBoxesInColumn = 2 * 9;
+        int sizeWorkBox = 9;
+        int sizeBoxesInRow = 2 * 9;
+        int sizeBoxesInColumn = 2 * 9;
         // MPI_Send(batchesToSend, size, MPI_CHAR, slaveId, 0, MPI_COMM_WORLD);
         //std::vector<unsigned char> data = std::vector<unsigned char>(7);
         /*for(int i = 0; i < 7; i++)
         {
-        	data[i] = 'a' + i;
+            data[i] = 'a' + i;
         }*/
-
+        std::cout << "CollectedBatches " << numOfCollectedBatches << " slaveId: " << slaveId << "batchesPerSlave: " << batchesPerSlave << std::endl;
         // MPI_Send(batchesToSend.front().getBoxesInRow().data(), size, MPI_CHAR, slaveId, 0, MPI_COMM_WORLD);
         MPI_Send(batch.getWorkBox().getCells().data(), sizeWorkBox, MPI_CHAR, slaveId, 0, MPI_COMM_WORLD);
         MPI_Send(batch.getBoxesInRow().data(), sizeBoxesInRow, MPI_CHAR, slaveId, 1, MPI_COMM_WORLD);
@@ -217,6 +217,7 @@ void Solver::fragmentTableToBoxes()
 {
     int boxesPerRow = 3;
     int boxesPerCol = 3;
+    boxes.clear();
 
     // std::cout << "Send boxes to nodes" << std::endl;
     for(int rowNum = 0; rowNum < boxesPerRow; rowNum++)
