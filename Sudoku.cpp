@@ -167,7 +167,7 @@ Solver run_master(Solver solver) {
     return solver;
 }
 
-void run_slave(int rank, int iter) {    
+void run_slave(int rank) {    
     MPI_Status status;
     
     int sizeWorkBox = 9;
@@ -224,22 +224,20 @@ int main()
 {
     auto const mpi_guard = crf::mpi_guard{};
     int wrank;
-    Solver solver("000801000000000043500000000000070800020030000000000100600000075003400000000200600");
+    Solver solver("030700050008005700000630004004100300000000000290400060001000439080002000900000180");
     
     MPI_Comm_rank( MPI_COMM_WORLD, &wrank );
-    for(int i = 0; i < 81; i++){
-    //MPI_Barrier(MPI_COMM_WORLD);
+    while(!solver.isSolved()){
         
-    switch( wrank ) {
-        case 0:
-            solver = run_master(solver);
-            break; 
-        default:
-            run_slave( wrank, i );
+        switch( wrank ) {
+            case 0:
+                solver = run_master(solver);
+                break; 
+            default:
+                run_slave( wrank );
+        }
     }
-    //MPI_Barrier(MPI_COMM_WORLD);
     
-    }
     return 0;
 
 }
