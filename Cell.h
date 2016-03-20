@@ -9,7 +9,7 @@ public:
     Cell(int maxPossibleValue, int box, int cell); // n is MaxPossibleValue
     Cell(char val, int maxPossibleValue, int box, int cell);
     Cell(char val, std::vector<char> possibleValues, int box, int cell);
-
+    Cell(Cell *c);
     ~Cell();
 
     char getValue();    

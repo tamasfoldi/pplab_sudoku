@@ -11,6 +11,13 @@ Cell::Cell(int maxPossibleValue, int box, int cell)
     }
 }
 
+Cell::Cell(Cell* c) {
+    boxNumber = c->getBoxNumber();
+    cellNumber = c->getCellNumber();
+    value = c->getValue();
+    possibleValues = c->getPossibleValues();
+}
+
 Cell::Cell(char val, int maxPossibleValue, int box, int cell)
 {
     this->boxNumber = box;

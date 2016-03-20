@@ -46,6 +46,7 @@ std::vector<char> setToVector(std::set<char> set)
 }
 
 Solver run_master(Solver solver) {
+    Solver tmp = solver;
     // Tov�bbi megoldhat� 17 elemet tartalmaz� t�bl�k: http://http://staffhome.ecm.uwa.edu.au/~00013890/sudokumin.php
     // std::cout << "Problem:" << std::endl << std::endl;
     solver.print(std::cout);
@@ -160,6 +161,10 @@ Solver run_master(Solver solver) {
         }
     }
     
+    if(solver.isEqual(tmp)){
+        solver.solveBackTrack();     
+    }
+    
 
     
     solver.print(std::cout);
@@ -224,7 +229,7 @@ int main()
 {
     auto const mpi_guard = crf::mpi_guard{};
     int wrank;
-    Solver solver("030700050008005700000630004004100300000000000290400060001000439080002000900000180");
+    Solver solver("000801000000000043500000000000070800020030000000000100600000075003400000000200600");
     
     MPI_Comm_rank( MPI_COMM_WORLD, &wrank );
     while(!solver.isSolved()){

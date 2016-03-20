@@ -14,6 +14,7 @@ Solver::Solver()
             data[y][x] = 0;
         }
     }
+    fallBackNumber = 0;
 }
 
 Solver::Solver(const char * init)
@@ -25,6 +26,7 @@ Solver::Solver(const char * init)
         int y = i / 9;
         data[y][x] = init[i] - '0';
     }
+    fallBackNumber = 0;    
 }
 
 Solver::Solver(const Solver * init)
@@ -37,6 +39,7 @@ Solver::Solver(const Solver * init)
             data[y][x] = init->data[y][x];
         }
     }
+    fallBackNumber = 0;    
 }
 
 
@@ -280,4 +283,19 @@ Batch Solver::getBatchForBox(int boxIndex)
     
     // batch.print(std::cout);
     return batch;
+}
+
+std::vector<Box> Solver::getBoxes() {
+    return boxes;
+}
+
+bool Solver::isEqual(Solver s) {
+    if(s.getBoxes().size() != getBoxes().size())
+        return false;
+    for(int i = 0; i < getBoxes().size(); i++) {
+        if(!getBoxes()[i].isEqual(s.getBoxes()[i]))
+            return false;
+    }
+    
+    return true;
 }

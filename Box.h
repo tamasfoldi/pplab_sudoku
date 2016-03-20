@@ -6,20 +6,22 @@
 class Box
 {
 public:
-	Box();
-	Box(const char** init);
-	Box(const Box* init);
+    Box();
+    Box(const char** init);
+    Box(const Box* init);
+    
+    bool isEqual(Box b);
 
-	
-	Box(std::vector<char> data);
+    
+    Box(std::vector<char> data);
 
-	~Box();
-	void set(char val, int x, int y);
-	void print(std::ostream & s);
+    ~Box();
+    void set(char val, int x, int y);
+    void print(std::ostream & s);
 
-	std::vector<char> getCells();
+    std::vector<char> getCells();
 private:
-	char cells[3][3];
+    char cells[3][3];
 
 };
 
