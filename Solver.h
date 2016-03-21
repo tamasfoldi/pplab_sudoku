@@ -9,8 +9,8 @@
 class Solver
 {
 public:
-    Solver();
-    Solver(const char* init);
+    Solver(int n);
+    Solver(const char* init, int n);
     Solver(const Solver* init);
     // Solver(int n, const Solver* init);
 
@@ -27,7 +27,6 @@ public:
     void initSize(int n);
 
     void sendBoxesToNodes(std::vector<Batch> batches);
-    void collectPossibleValues(char* box, char** relevantBoxes);
 
     void fragmentTableToBoxes();
     std::vector<Batch> getBoxBatches();
@@ -36,20 +35,15 @@ public:
     
     std::vector<Box> getBoxes();
     
-    int fallBackNumber;
-    std::vector<std::vector<Cell>> fallBackPossibleValues;
-
+    int getN();
 private:
 
     Batch getBatchForBox(int boxIndex);
     Box getBox(int boxRowNum,int boxColNum);
     
-
-
     std::vector<Box> boxes;
 
-    char data[9][9];
-    char possibleValues[9][9][9];
+    char ** data;
 
     int N;
     int boxWidth;

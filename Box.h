@@ -11,7 +11,6 @@ public:
     Box(const Box* init);
     
     bool isEqual(Box b);
-
     
     Box(std::vector<char> data);
 
@@ -22,6 +21,5 @@ public:
     std::vector<char> getCells();
 private:
     char cells[3][3];
-
 };
 

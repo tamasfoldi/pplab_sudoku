@@ -4,42 +4,39 @@
 #include <math.h>
 #include <vector>
 
-Solver::Solver()
+Solver::Solver(int n)
 {
-    initSize(9);
-    for (int y = 0; y < 9; ++y)
+    initSize(n);
+    for (int y = 0; y < n; ++y)
     {
-        for (int x = 0; x < 9; ++x)
+        for (int x = 0; x < n; ++x)
         {
             data[y][x] = 0;
         }
     }
-    fallBackNumber = 0;
 }
 
-Solver::Solver(const char * init)
+Solver::Solver(const char * init, int n)
 {
-    initSize(9);
-    for (int i = 0; i < 81; ++i)
+    initSize(n);
+    for (int i = 0; i < n * n ; ++i)
     {
-        int x = i % 9;
-        int y = i / 9;
+        int x = i % n;
+        int y = i / n;
         data[y][x] = init[i] - '0';
     }
-    fallBackNumber = 0;    
 }
 
 Solver::Solver(const Solver * init)
 {
-    initSize(9);
-    for (int y = 0; y < 9; ++y)
+    initSize(init->N);
+    for (int y = 0; y < N; ++y)
     {
-        for (int x = 0; x < 9; ++x)
+        for (int x = 0; x < N; ++x)
         {
             data[y][x] = init->data[y][x];
         }
     }
-    fallBackNumber = 0;    
 }
 
 
@@ -49,9 +46,9 @@ Solver::~Solver()
 
 void Solver::print(std::ostream & s)
 {
-    for (int y = 0; y < 9; ++y)
+    for (int y = 0; y < N; ++y)
     {
-        for (int x = 0; x < 9; ++x)
+        for (int x = 0; x < N; ++x)
         {
             s << (char)(data[y][x] + '0') << " ";
         }
@@ -62,9 +59,9 @@ void Solver::print(std::ostream & s)
 bool Solver::isSolved()
 {
     // Minden cella ki van t�ltve a t�bl�ban?
-    for (int y = 0; y < 9; ++y)
+    for (int y = 0; y < N; ++y)
     {
-        for (int x = 0; x < 9; ++x)
+        for (int x = 0; x < N; ++x)
         {
             if (data[y][x] == 0) return false;
         }
@@ -77,18 +74,18 @@ bool Solver::isAllowed(char val, int x, int y)
     bool allowed = true;
 
     // Azonos sorban vagy oszlopban csak egy 'val' lehet
-    for (int i = 0; i < 9; ++i)
+    for (int i = 0; i < N; ++i)
     {
         if (data[y][i] == val) allowed = false;
         if (data[i][x] == val) allowed = false;
     }
 
     // Az adott 3x3-as cell�ban csak egy 'val' lehet
-    int cellBaseX = 3 * (int)(x / 3);
-    int cellBaseY = 3 * (int)(y / 3);
-    for (int y = cellBaseY; y < cellBaseY + 3; ++y)
+    int cellBaseX = boxWidth * (int)(x / boxWidth);
+    int cellBaseY = boxWidth * (int)(y / boxWidth);
+    for (int y = cellBaseY; y < cellBaseY + boxWidth; ++y)
     {
-        for (int x = cellBaseX; x < cellBaseX + 3; ++x)
+        for (int x = cellBaseX; x < cellBaseX + boxWidth; ++x)
         {
             if (data[y][x] == val) allowed = false;
         }
@@ -106,15 +103,15 @@ bool Solver::solveBackTrack()
     }
 
     // Keress�nk egy poz�ci�t, amely m�g nincs kit�ltve
-    for (int y = 0; y < 9; ++y)
+    for (int y = 0; y < N; ++y)
     {
-        for (int x = 0; x < 9; ++x)
+        for (int x = 0; x < N; ++x)
         {
             // Nincs m�g kit�ltve?
             if (data[y][x] == 0)
             {
                 // Keress�nk egy �rt�ket, amely megfelel a szab�lyoknak
-                for (int n = 1; n <= 9; ++n)
+                for (int n = 1; n <= N; ++n)
                 {
                     // Be�rhat� az adott poz�ci�ba?
                     if (isAllowed(n, x, y))
@@ -151,14 +148,20 @@ void Solver::initSize(int n)
     N = n;
     boxWidth = sqrt(N);
     boxNumPerNode = ceil(sqrt(N) /  numNodes);
+
+    data = new char*[N];
+    for(int i = 0; i < N; i++)
+    {
+        data[i] = new char[N];
+    }
 }
 
 // box �s relev�ns boxok k�ld�se egyes node oknak
 void Solver::sendBoxesToNodes(std::vector<Batch> batches)
 {
     int slaveNum = 3;
-    int numOfBoxes = 9;
-    int batchesPerSlave = ceil(numOfBoxes / slaveNum);
+
+    int batchesPerSlave = ceil(N / slaveNum);
 
     std::vector<Batch> batchesToSend;
     int numOfCollectedBatches = 0;
@@ -168,23 +171,15 @@ void Solver::sendBoxesToNodes(std::vector<Batch> batches)
         // batchesToSend.push_back(batch);
         numOfCollectedBatches++;
 
-        int sizeWorkBox = 9;
-        int sizeBoxesInRow = 2 * 9;
-        int sizeBoxesInColumn = 2 * 9;
-        // MPI_Send(batchesToSend, size, MPI_CHAR, slaveId, 0, MPI_COMM_WORLD);
-        //std::vector<unsigned char> data = std::vector<unsigned char>(7);
-        /*for(int i = 0; i < 7; i++)
-        {
-            data[i] = 'a' + i;
-        }*/
-        std::cout << "CollectedBatches " << numOfCollectedBatches << " slaveId: " << slaveId << "batchesPerSlave: " << batchesPerSlave << std::endl;
-        // MPI_Send(batchesToSend.front().getBoxesInRow().data(), size, MPI_CHAR, slaveId, 0, MPI_COMM_WORLD);
-        MPI_Send(batch.getWorkBox().getCells().data(), sizeWorkBox, MPI_CHAR, slaveId, 0, MPI_COMM_WORLD);
+        int N = 9;
+        int sizeBoxesInRow = (boxWidth - 1) * N;
+        int sizeBoxesInColumn = (boxWidth - 1) * N;
+        // std::cout << "CollectedBatches " << numOfCollectedBatches << " slaveId: " << slaveId << "batchesPerSlave: " << batchesPerSlave << std::endl;
+
+        MPI_Send(batch.getWorkBox().getCells().data(), N, MPI_CHAR, slaveId, 0, MPI_COMM_WORLD);
         MPI_Send(batch.getBoxesInRow().data(), sizeBoxesInRow, MPI_CHAR, slaveId, 1, MPI_COMM_WORLD);
         MPI_Send(batch.getBoxesInColumn().data(), sizeBoxesInColumn, MPI_CHAR, slaveId, 2, MPI_COMM_WORLD);
-        // std::cout << "AAAAAAAAAAAA" << batchesToSend.data() << std::endl;
         
-        // batchesToSend.empty();
         if(numOfCollectedBatches == batchesPerSlave)
         {
             slaveId++;
@@ -197,16 +192,16 @@ void Solver::sendBoxesToNodes(std::vector<Batch> batches)
 // visszadia a rowNum sor �s colNum oszlopban tal�lhat� Dobozt
 Box Solver::getBox(int rowNum, int colNum)
 {
-    int rowStart = rowNum * 3;
-    int colStart = colNum * 3;
+    int rowStart = rowNum * boxWidth;
+    int colStart = colNum * boxWidth;
 
     Box box;
 
     // std::cout << "GetBOx: " << std::endl;
-    for(int i = rowStart; i < rowStart + 3; i++)
+    for(int i = rowStart; i < rowStart + boxWidth; i++)
     {
         // std::cout << "row: " << i << std::endl;
-        for(int j = colStart; j < colStart + 3; j++)
+        for(int j = colStart; j < colStart + boxWidth; j++)
         {
             // std::cout << "col: " << i << std::endl;
             box.set(data[i][j], i - rowStart, j - colStart);
@@ -218,8 +213,8 @@ Box Solver::getBox(int rowNum, int colNum)
 
 void Solver::fragmentTableToBoxes()
 {
-    int boxesPerRow = 3;
-    int boxesPerCol = 3;
+    int boxesPerRow = boxWidth;
+    int boxesPerCol = boxWidth;
     boxes.clear();
 
     // std::cout << "Send boxes to nodes" << std::endl;
@@ -258,14 +253,14 @@ std::vector<Batch> Solver::getBoxBatches()
 
 Batch Solver::getBatchForBox(int boxIndex)
 {
-    int boxesPerRow = 3;
-    int boxesPerCol = 3;
+    int boxesPerRow = boxWidth;
+    int boxesPerCol = boxWidth;
 
     Batch batch;
     int rowNum = boxIndex / boxesPerRow;
     int colNum = boxIndex % boxesPerRow;
 
-    for(int i = 0; i < 9; i++)
+    for(int i = 0; i < N; i++)
     {
         if((i / boxesPerRow == rowNum) && (i % boxesPerCol == colNum))
         {
@@ -298,4 +293,9 @@ bool Solver::isEqual(Solver s) {
     }
     
     return true;
+}
+
+int Solver::getN()
+{
+    return N;
 }

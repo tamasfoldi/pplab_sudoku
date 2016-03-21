@@ -49,19 +49,19 @@ Solver run_master(Solver solver) {
     Solver tmp = solver;
     // Tov�bbi megoldhat� 17 elemet tartalmaz� t�bl�k: http://http://staffhome.ecm.uwa.edu.au/~00013890/sudokumin.php
     // std::cout << "Problem:" << std::endl << std::endl;
-    solver.print(std::cout);
-    std::cout<<std::endl<<std::endl;
+    // solver.print(std::cout);
+    // std::cout<<std::endl<<std::endl;
     // std::cout << std::endl << "-----------------------------------------" << std::endl;
-    // std::cout << "Solution:" << std::endl << std::endl;;
+    // std::cout << "Solution:" << std::endl << std::endl;
     // solver.solveBackTrack();
     // solver.print(std::cout);
 
-    std::cout << "fragmentTableToBoxes" << std::endl;
+    //std::cout << "fragmentTableToBoxes" << std::endl;
     solver.fragmentTableToBoxes();
-    std::cout << "sendBoxesToNodes" << std::endl;   
+    //std::cout << "sendBoxesToNodes" << std::endl;   
     
     solver.sendBoxesToNodes(solver.getBoxBatches());
-    std::cout << "Master" << std::endl;
+    //std::cout << "Master" << std::endl;
 
     int batchesToReceivePerNode = 3;
     int maxRank = 3;
@@ -70,22 +70,22 @@ Solver run_master(Solver solver) {
     int n;
     for(int i = 1; i <= maxRank; i++)
     {
-        std::cout << "Rank: " << maxRank << std::endl;
+        // std::cout << "Rank: " << maxRank << std::endl;
         for (int j = 0; j < batchesToReceivePerNode; ++j) {
             int tag = i * 10 + j + 1;
             int siize = 9;
-            std::cout <<  "Tag: " << tag <<  std::endl;
+            // std::cout <<  "Tag: " << tag <<  std::endl;
 
             std::vector<Cell> cellsOfBox;
             for(int k = 0; k < 9; k++)
             {
-                std::cout << "CellNum: " << k << std::endl;
+                // std::cout << "CellNum: " << k << std::endl;
                 std::vector<char> c = std::vector<char>(9);
                 MPI_Status status;
 
                 MPI_Recv(c.data(), siize, MPI_CHAR, MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);   
                 Box possibleValuesOfACell(c);                
-                possibleValuesOfACell.print(std::cout);     
+                // possibleValuesOfACell.print(std::cout);     
                 Cell newCell(n, j, k);
                 newCell.setPossibleValues(possibleValuesOfACell.getCells());
                 cellsOfBox.push_back(newCell);
@@ -101,8 +101,8 @@ Solver run_master(Solver solver) {
         int cellNum = 0;        
         for(auto &cell: box)
         {
-            std::cout << "Box Num: " << boxNum <<  ", Cell Num: " << cellNum << std::endl;
-            cell.print(std::cout);            
+            // std::cout << "Box Num: " << boxNum <<  ", Cell Num: " << cellNum << std::endl;
+            // cell.print(std::cout);            
             cellNum++;
         }
         boxNum++;
@@ -165,10 +165,9 @@ Solver run_master(Solver solver) {
         solver.solveBackTrack();     
     }
     
-
-    
-    solver.print(std::cout);
-    std::cout<<std::endl<<std::endl;
+    // std::cout << "Solution:" << std::endl << std::endl;
+    //solver.print(std::cout);
+    //std::cout<<std::endl<<std::endl;
     return solver;
 }
 
@@ -188,7 +187,7 @@ void run_slave(int rank) {
 
        for(int i = 0; i < batchesToReceive; i++)
        {
-          std::cout<< "RECV" << std::endl;
+          //std::cout<< "RECV" << std::endl;
           MPI_Recv(workBoxData.data(), sizeWorkBox, MPI_CHAR, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
         //std::cout << "WorkBox Received, " << rank << std::endl;
           MPI_Recv(rowData.data(), sizeBoxesInRow, MPI_CHAR, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &status);
@@ -201,24 +200,21 @@ void run_slave(int rank) {
           //workBox.print(std::cout);
 
           Batch batch;
-        batch.setWorkBox(workBoxData);
+          batch.setWorkBox(workBoxData);
           batch.setRow(rowData);
           batch.setColumn(columnData); 
 
-        batch.initPossibleValues();
+          batch.initPossibleValues();
           
-        batches.push_back(batch);
+          batches.push_back(batch);
       }
    
-    //std::cout << "BEGIN FOR slaves" << std::endl;
     for (int i = 0; i < batchesToReceive; ++i) {
         int tag = rank * 10 + i + 1; // azért +1 hogy 1 based legyen mind a két digit
         batches[i].calculatePossibleValues(); 
         for(int j = 0; j < 9; j++) {
         
             int vSize = 9;
-            //std::cout<<"DOFOR slave" << std::endl;
-            //batches[0].getWorkBox().print(std::cout);
             MPI_Send(setToVector(batches[i].getPossibleValues()[j]).data(), vSize, MPI_CHAR, 0, tag, MPI_COMM_WORLD);    
         }
     }
@@ -229,11 +225,19 @@ int main()
 {
     auto const mpi_guard = crf::mpi_guard{};
     int wrank;
-    Solver solver("000801000000000043500000000000070800020030000000000100600000075003400000000200600");
+    Solver solver("000801000000000043500000000000070800020030000000000100600000075003400000000200600", 9);
     
+
     MPI_Comm_rank( MPI_COMM_WORLD, &wrank );
+    
+    if(wrank == 0)
+    {
+        std::cout << "Input:" << std::endl << std::endl;
+        solver.print(std::cout);
+        std::cout << std::endl << std::endl;
+    }
+    
     while(!solver.isSolved()){
-        
         switch( wrank ) {
             case 0:
                 solver = run_master(solver);
@@ -242,8 +246,9 @@ int main()
                 run_slave( wrank );
         }
     }
-    
+    std::cout << "Solution:" << std::endl << std::endl;
+    solver.print(std::cout);
+    std::cout << std::endl << std::endl << "DONE" << std::endl;
     return 0;
-
 }
 
